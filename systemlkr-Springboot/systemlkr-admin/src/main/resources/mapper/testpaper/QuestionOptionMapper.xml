@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.systemlkr.testpaper.mapper.QuestionOptionMapper">
+    
+    <resultMap type="QuestionOption" id="QuestionOptionResult">
+        <result property="id"    column="id"    />
+        <result property="questionId"    column="question_id"    />
+        <result property="optionLabel"    column="option_label"    />
+        <result property="optionContent"    column="option_content"    />
+        <result property="isCorrect"    column="is_correct"    />
+    </resultMap>
+
+    <sql id="selectQuestionOptionVo">
+        select id, question_id, option_label, option_content, is_correct from question_option
+    </sql>
+
+    <select id="selectQuestionOptionList" parameterType="QuestionOption" resultMap="QuestionOptionResult">
+        <include refid="selectQuestionOptionVo"/>
+        <where>  
+            <if test="questionId != null "> and question_id = #{questionId}</if>
+            <if test="optionLabel != null  and optionLabel != ''"> and option_label = #{optionLabel}</if>
+            <if test="optionContent != null  and optionContent != ''"> and option_content = #{optionContent}</if>
+            <if test="isCorrect != null "> and is_correct = #{isCorrect}</if>
+        </where>
+    </select>
+    
+    <select id="selectQuestionOptionById" parameterType="Long" resultMap="QuestionOptionResult">
+        <include refid="selectQuestionOptionVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertQuestionOption" parameterType="QuestionOption" useGeneratedKeys="true" keyProperty="id">
+        insert into question_option
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="questionId != null">question_id,</if>
+            <if test="optionLabel != null">option_label,</if>
+            <if test="optionContent != null and optionContent != ''">option_content,</if>
+            <if test="isCorrect != null">is_correct,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="questionId != null">#{questionId},</if>
+            <if test="optionLabel != null">#{optionLabel},</if>
+            <if test="optionContent != null and optionContent != ''">#{optionContent},</if>
+            <if test="isCorrect != null">#{isCorrect},</if>
+         </trim>
+    </insert>
+
+    <update id="updateQuestionOption" parameterType="QuestionOption">
+        update question_option
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="questionId != null">question_id = #{questionId},</if>
+            <if test="optionLabel != null">option_label = #{optionLabel},</if>
+            <if test="optionContent != null and optionContent != ''">option_content = #{optionContent},</if>
+            <if test="isCorrect != null">is_correct = #{isCorrect},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteQuestionOptionById" parameterType="Long">
+        delete from question_option where id = #{id}
+    </delete>
+
+    <delete id="deleteQuestionOptionByIds" parameterType="String">
+        delete from question_option where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteQuestionOptionByQuestionId" parameterType="Long">
+        delete from question_option where question_id = #{questionId}
+    </delete>
+</mapper>

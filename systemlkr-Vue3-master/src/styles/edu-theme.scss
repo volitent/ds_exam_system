@@ -1,0 +1,27 @@
+// 教育平台风格：按钮
+.el-button {
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+// 卡片
+.el-card {
+  border-radius: 12px;
+  border: none;
+}
+
+// 表格
+.el-table {
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 14px;
+  .el-table__header th {
+    font-weight: 600;
+  }
+}
+
+// 表单
+.el-form-item__label {
+  font-weight: bold;
+  font-size: 14px;
+}

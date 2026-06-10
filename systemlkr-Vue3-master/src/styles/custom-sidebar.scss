@@ -1,0 +1,34 @@
+// 文件名：src/styles/custom-sidebar.scss
+.sidebar-container {
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+
+  .el-menu {
+    background-color: transparent !important;
+
+    .el-menu-item {
+      font-size: 15px;
+      border-radius: 8px;
+      margin: 4px 8px;
+      transition: all 0.2s ease-in-out;
+
+      &:hover {
+        background-color: #3A3A3A;
+      }
+
+      &.is-active {
+        font-weight: bold;
+      }
+
+      .svg-icon {
+        margin-right: 10px;
+      }
+    }
+
+    .el-submenu__title {
+      font-size: 14px;
+      padding: 12px;
+
+    }
+  }
+}

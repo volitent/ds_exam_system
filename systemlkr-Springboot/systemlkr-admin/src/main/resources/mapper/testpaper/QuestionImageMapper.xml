@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.systemlkr.testpaper.mapper.QuestionImageMapper">
+    
+    <resultMap type="QuestionImage" id="QuestionImageResult">
+        <result property="id"    column="id"    />
+        <result property="questionId"    column="question_id"    />
+        <result property="imagePath"    column="image_path"    />
+        <result property="type"    column="type"    />
+    </resultMap>
+
+    <sql id="selectQuestionImageVo">
+        select id, question_id, image_path, type from question_image
+    </sql>
+
+    <select id="selectQuestionImageList" parameterType="QuestionImage" resultMap="QuestionImageResult">
+        <include refid="selectQuestionImageVo"/>
+        <where>  
+            <if test="questionId != null "> and question_id = #{questionId}</if>
+            <if test="type != null "> and type = #{type}</if>
+        </where>
+    </select>
+    
+    <select id="selectQuestionImageById" parameterType="Long" resultMap="QuestionImageResult">
+        <include refid="selectQuestionImageVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertQuestionImage" parameterType="QuestionImage" useGeneratedKeys="true" keyProperty="id">
+        insert into question_image
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="questionId != null">question_id,</if>
+            <if test="imagePath != null">image_path,</if>
+            <if test="type != null">type,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="questionId != null">#{questionId},</if>
+            <if test="imagePath != null">#{imagePath},</if>
+            <if test="type != null">#{type},</if>
+         </trim>
+    </insert>
+
+    <update id="updateQuestionImage" parameterType="QuestionImage">
+        update question_image
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="questionId != null">question_id = #{questionId},</if>
+            <if test="imagePath != null">image_path = #{imagePath},</if>
+            <if test="type != null">type = #{type},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteQuestionImageById" parameterType="Long">
+        delete from question_image where id = #{id}
+    </delete>
+
+    <delete id="deleteQuestionImageByQuestionId" parameterType="Long">
+        delete from question_image where question_id = #{questionId}
+    </delete>
+
+    <delete id="deleteQuestionImageByIds" parameterType="String">
+        delete from question_image where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

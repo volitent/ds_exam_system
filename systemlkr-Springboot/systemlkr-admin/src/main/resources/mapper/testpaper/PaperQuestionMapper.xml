@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.systemlkr.testpaper.mapper.PaperQuestionMapper">
+    
+    <resultMap type="PaperQuestion" id="PaperQuestionResult">
+        <result property="id"    column="id"    />
+        <result property="paperId"    column="paper_id"    />
+        <result property="questionId"    column="question_id"    />
+        <result property="questionScore"    column="question_score"    />
+        <result property="sortOrder"    column="sort_order"    />
+    </resultMap>
+
+    <sql id="selectPaperQuestionVo">
+        select id, paper_id, question_id, question_score, sort_order from paper_question
+    </sql>
+
+    <select id="selectPaperQuestionList" parameterType="PaperQuestion" resultMap="PaperQuestionResult">
+        <include refid="selectPaperQuestionVo"/>
+        <where>  
+        </where>
+    </select>
+    
+    <select id="selectPaperQuestionById" parameterType="Long" resultMap="PaperQuestionResult">
+        <include refid="selectPaperQuestionVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertPaperQuestion" parameterType="PaperQuestion" useGeneratedKeys="true" keyProperty="id">
+        insert into paper_question
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="paperId != null">paper_id,</if>
+            <if test="questionId != null">question_id,</if>
+            <if test="questionScore != null">question_score,</if>
+            <if test="sortOrder != null">sort_order,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="paperId != null">#{paperId},</if>
+            <if test="questionId != null">#{questionId},</if>
+            <if test="questionScore != null">#{questionScore},</if>
+            <if test="sortOrder != null">#{sortOrder},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePaperQuestion" parameterType="PaperQuestion">
+        update paper_question
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="paperId != null">paper_id = #{paperId},</if>
+            <if test="questionId != null">question_id = #{questionId},</if>
+            <if test="questionScore != null">question_score = #{questionScore},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deletePaperQuestionById" parameterType="Long">
+        delete from paper_question where id = #{id}
+    </delete>
+
+    <delete id="deletePaperQuestionByIds" parameterType="String">
+        delete from paper_question where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

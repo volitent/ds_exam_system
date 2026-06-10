@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# IDE
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build output
+dist/
+build/
+target/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+
+# Claude code
+CLAUDE.md
+claude-progress.md
+DECISIONS.md
+feature_list.md

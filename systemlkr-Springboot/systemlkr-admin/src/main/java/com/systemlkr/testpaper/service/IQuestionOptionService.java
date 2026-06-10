@@ -1,0 +1,63 @@
+package com.systemlkr.testpaper.service;
+
+import java.util.List;
+import com.systemlkr.testpaper.domain.QuestionOption;
+
+/**
+ * 选择题选项Service接口
+ * 
+ * @author lkr
+ * @date 2025-03-08
+ */
+public interface IQuestionOptionService 
+{
+    /**
+     * 查询选择题选项
+     * 
+     * @param id 选择题选项主键
+     * @return 选择题选项
+     */
+    public QuestionOption selectQuestionOptionById(Long id);
+
+    /**
+     * 查询选择题选项列表
+     * 
+     * @param questionOption 选择题选项
+     * @return 选择题选项集合
+     */
+    public List<QuestionOption> selectQuestionOptionList(QuestionOption questionOption);
+
+    /**
+     * 新增选择题选项
+     * 
+     * @param questionOption 选择题选项
+     * @return 结果
+     */
+    public int insertQuestionOption(QuestionOption questionOption);
+
+    /**
+     * 修改选择题选项
+     * 
+     * @param questionOption 选择题选项
+     * @return 结果
+     */
+    public int updateQuestionOption(QuestionOption questionOption);
+
+    /**
+     * 批量删除选择题选项
+     * 
+     * @param ids 需要删除的选择题选项主键集合
+     * @return 结果
+     */
+    public int deleteQuestionOptionByIds(Long[] ids);
+
+    /**
+     * 删除选择题选项信息
+     * 
+     * @param id 选择题选项主键
+     * @return 结果
+     */
+    public int deleteQuestionOptionById(Long id);
+
+    int deleteQuestionOptionByQuestionId(Long questionId);
+}

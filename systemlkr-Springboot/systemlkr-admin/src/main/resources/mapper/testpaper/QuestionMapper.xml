@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.systemlkr.testpaper.mapper.QuestionMapper">
+    
+    <resultMap type="Question" id="QuestionResult">
+        <result property="id"    column="question_id"    />
+        <result property="questionType"    column="question_type"    />
+        <result property="title"    column="title"    />
+        <result property="difficulty"    column="difficulty"    />
+        <result property="answer"    column="answer"    />
+        <result property="analysis"    column="analysis"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="creatorId"    column="creator_id"    />
+        <result property="remarks"    column="remarks"    />
+    </resultMap>
+
+    <!-- 全量resultMap：映射 question + option + kp + image -->
+    <resultMap id="QuestionFullResultMap" type="Question">
+        <!-- 主表字段，对应 SELECT 中的 q.id AS question_id -->
+        <id property="id" column="question_id"/>
+        <result property="questionType" column="question_type"/>
+        <result property="title" column="title"/>
+        <result property="difficulty" column="difficulty"/>
+        <result property="answer" column="answer"/>
+        <result property="analysis" column="analysis"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="remarks" column="remarks"/>
+
+        <!-- 一题多选项 -->
+        <collection property="optionList"
+                    javaType="java.util.List"
+                    ofType="com.systemlkr.testpaper.domain.QuestionOption">
+            <id property="id" column="option_id"/>
+            <result property="questionId" column="option_question_id"/>
+            <result property="optionLabel" column="option_label"/>
+            <result property="optionContent" column="option_content"/>
+            <result property="isCorrect" column="is_correct"/>
+        </collection>
+
+        <!-- 一题多知识点 -->
+        <collection property="knowledgePoints"
+                    javaType="java.util.List"
+                    ofType="String">
+            <result property="kpName" column="kp_name"/>
+        </collection>
+
+        <!-- 一题多图片 -->
+        <collection property="imageList"
+                    javaType="java.util.List"
+                    ofType="com.systemlkr.testpaper.domain.QuestionImage">
+            <id property="id" column="image_id"/>
+            <result property="questionId" column="image_question_id"/>
+            <result property="imagePath" column="image_path"/>
+            <result property="type" column="image_type"/>
+        </collection>
+    </resultMap>
+
+
+    <sql id="selectQuestionVo">
+        SELECT
+            q.id AS question_id,
+            q.question_type AS question_type,
+            q.title AS title,
+            q.difficulty AS difficulty,
+            q.answer AS answer,
+            q.analysis AS analysis,
+            q.create_time AS create_time,
+            q.update_time AS update_time,
+            q.creator_id AS creator_id,
+            q.remarks AS remarks,
+
+            kp.kp_name,
+
+            qi.id AS image_id,
+            qi.question_id AS image_question_id,
+            qi.image_path,
+            qi.type AS image_type
+
+        FROM question q
+                 LEFT JOIN question_knowledge qk ON q.id = qk.question_id
+                 LEFT JOIN knowledge_point kp ON qk.kp_id = kp.id
+                 LEFT JOIN question_image qi ON q.id = qi.question_id
+    </sql>
+
+    <select id="selectQuestionList" parameterType="Question" resultMap="QuestionResult">
+        SELECT id, question_type, title, difficulty, answer, analysis, create_time, update_time, creator_id, remarks
+        FROM question
+        <where>
+            <if test="questionType != null and questionType != ''">
+                AND question_type = #{questionType}
+            </if>
+            <if test="title != null and title != ''">
+                AND title LIKE CONCAT('%', #{title}, '%')
+            </if>
+        </where>
+    </select>
+    
+    <select id="selectQuestionById" parameterType="Long" resultMap="QuestionFullResultMap">
+        <include refid="selectQuestionVo"/>
+        where q.id = #{id}
+        ORDER BY q.id, kp.id, qi.id        <!-- ORDER BY在后 -->
+
+    </select>
+
+    <select id="selectQuestionAll" resultMap="QuestionFullResultMap">
+        <include refid="selectQuestionVo"/>
+        ORDER BY q.id, kp.id, qi.id        <!-- ORDER BY在后 -->
+    </select>
+
+    <select id="selectQuestionAllById" parameterType="Long" resultMap="QuestionFullResultMap">
+        SELECT
+            q.id AS question_id,
+            q.question_type AS question_type,
+            q.title AS title,
+            q.difficulty AS difficulty,
+            q.answer AS answer,
+            q.analysis AS analysis,
+            q.create_time AS create_time,
+            q.update_time AS update_time,
+            q.creator_id AS creator_id,
+            q.remarks AS remarks,
+
+            qo.id AS option_id,
+            qo.question_id AS option_question_id,
+            qo.option_label,
+            qo.option_content,
+            qo.is_correct,
+
+            kp.id AS kp_id,
+            kp.kp_name,
+            kp.kp_desc,
+
+            qi.id AS image_id,
+            qi.question_id AS image_question_id,
+            qi.image_path,
+            qi.description AS image_description
+
+        FROM question q
+                 LEFT JOIN question_option qo ON q.id = qo.question_id
+                 LEFT JOIN question_knowledge qk ON q.id = qk.question_id
+                 LEFT JOIN knowledge_point kp ON qk.kp_id = kp.id
+                 LEFT JOIN question_image qi ON q.id = qi.question_id
+
+        WHERE q.id = #{id}
+
+        ORDER BY
+            qo.id,
+            kp.id,
+            qi.id
+    </select>
+
+    <select id="selectQuestionDetailByIds" parameterType="list" resultMap="QuestionFullResultMap">
+        SELECT
+        q.id AS question_id,
+        q.question_type,
+        q.title,
+        q.difficulty,
+        q.answer,
+        q.analysis,
+        q.create_time,
+        q.update_time,
+        q.creator_id,
+        q.remarks,
+        qo.id AS option_id,
+        qo.question_id AS option_question_id,
+        qo.option_label,
+        qo.option_content,
+        qo.is_correct,
+        kp.kp_name,
+        qi.id AS image_id,
+        qi.question_id AS image_question_id,
+        qi.image_path,
+        qi.type AS image_type
+        FROM question q
+        LEFT JOIN question_option qo ON q.id = qo.question_id
+        LEFT JOIN question_knowledge qk ON q.id = qk.question_id
+        LEFT JOIN knowledge_point kp ON qk.kp_id = kp.id
+        LEFT JOIN question_image qi ON q.id = qi.question_id
+        WHERE q.id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY q.id, qo.id, kp.kp_name, qi.id
+    </select>
+
+    <!-- 分页查询主表 -->
+    <select id="selectQuestionListBase" parameterType="Question" resultMap="QuestionResult">
+        SELECT q.id AS question_id, q.question_type, q.title, q.difficulty, q.answer, q.analysis,
+        q.create_time, q.update_time, q.creator_id, q.remarks
+        FROM question q
+        <where>
+            <if test="questionType != null and questionType != ''">AND q.question_type = #{questionType}</if>
+            <if test="title != null and title != ''">AND q.title like concat('%', #{title}, '%')</if>
+            <if test="difficulty != null">AND q.difficulty = #{difficulty}</if>
+            <if test="creatorId != null">AND q.creator_id = #{creatorId}</if>
+            <if test="kpName != null and kpName != ''">
+                AND q.id IN (
+                SELECT qk.question_id
+                FROM question_knowledge qk
+                JOIN knowledge_point kp ON qk.kp_id = kp.id
+                WHERE kp.kp_name LIKE CONCAT('%', #{kpName}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY q.id ASC
+    </select>
+
+    <!-- 查询子表（option + kp + image） -->
+    <select id="selectQuestionSubList" parameterType="list" resultMap="QuestionFullResultMap">
+        SELECT q.id AS question_id,
+        qo.id AS option_id, qo.question_id AS option_question_id, qo.option_label, qo.option_content, qo.is_correct,
+        kp.kp_name,
+        qi.id AS image_id, qi.question_id AS image_question_id, qi.image_path, qi.type AS image_type
+        FROM question q
+        LEFT JOIN question_option qo ON q.id = qo.question_id
+        LEFT JOIN question_knowledge qk ON q.id = qk.question_id
+        LEFT JOIN knowledge_point kp ON qk.kp_id = kp.id
+        LEFT JOIN question_image qi ON q.id = qi.question_id
+        WHERE q.id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY q.id, qo.id, kp.kp_name, qi.id
+    </select>
+
+    <select id="selectByKnowledgeTypeScore" resultType="Question" resultMap="QuestionFullResultMap">
+        SELECT
+            q.id AS question_id,
+            q.question_type,
+            q.title,
+            q.difficulty,
+            q.answer,
+            q.analysis,
+            q.create_time,
+            q.update_time,
+            q.creator_id,
+            q.score,
+            q.remarks,
+
+            qo.id AS option_id,
+            qo.option_label,
+            qo.option_content,
+            qo.is_correct,
+
+            kp.kp_name
+
+        FROM question q
+                 LEFT JOIN question_option qo ON q.id = qo.question_id
+                 LEFT JOIN question_knowledge qk ON q.id = qk.question_id
+                 LEFT JOIN knowledge_point kp ON qk.kp_id = kp.id
+
+        WHERE kp.kp_name = #{kpName}
+          AND q.question_type = #{questionType}
+
+        ORDER BY q.id, qo.option_label
+            LIMIT #{limit}
+    </select>
+
+
+    <insert id="insertQuestion" parameterType="Question" useGeneratedKeys="true" keyProperty="id">
+        insert into question
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="questionType != null and questionType != ''">question_type,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="difficulty != null">difficulty,</if>
+            <if test="answer != null">answer,</if>
+            <if test="analysis != null">analysis,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="creatorId != null">creator_id,</if>
+            <if test="remarks != null">remarks,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="questionType != null and questionType != ''">#{questionType},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="difficulty != null">#{difficulty},</if>
+            <if test="answer != null">#{answer},</if>
+            <if test="analysis != null">#{analysis},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="creatorId != null">#{creatorId},</if>
+            <if test="remarks != null">#{remarks},</if>
+         </trim>
+    </insert>
+
+    <update id="updateQuestion" parameterType="Question">
+        update question
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="questionType != null and questionType != ''">question_type = #{questionType},</if>
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="difficulty != null">difficulty = #{difficulty},</if>
+            <if test="answer != null">answer = #{answer},</if>
+            <if test="analysis != null">analysis = #{analysis},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="creatorId != null">creator_id = #{creatorId},</if>
+            <if test="remarks != null">remarks = #{remarks},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteQuestionById" parameterType="Long">
+        delete from question where id = #{id}
+    </delete>
+    
+    <delete id="deleteQuestionImageByQuestionId" parameterType="Long">
+        delete from question_image where question_id = #{id}
+    </delete>
+
+    <delete id="deleteQuestionByIds" parameterType="String">
+        delete from question where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

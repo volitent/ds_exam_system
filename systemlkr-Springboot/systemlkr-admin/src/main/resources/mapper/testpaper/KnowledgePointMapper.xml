@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.systemlkr.testpaper.mapper.KnowledgePointMapper">
+    
+    <resultMap type="KnowledgePoint" id="KnowledgePointResult">
+        <result property="id"    column="id"    />
+        <result property="kpName"    column="kp_name"    />
+        <result property="kpDesc"    column="kp_desc"    />
+    </resultMap>
+
+    <sql id="selectKnowledgePointVo">
+        select id, kp_name, kp_desc from knowledge_point
+    </sql>
+
+    <select id="selectKnowledgePointList" parameterType="KnowledgePoint" resultMap="KnowledgePointResult">
+        <include refid="selectKnowledgePointVo"/>
+        <where>  
+            <if test="kpName != null  and kpName != ''"> and kp_name like concat('%', #{kpName}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectKnowledgePointById" parameterType="Long" resultMap="KnowledgePointResult">
+        <include refid="selectKnowledgePointVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectKnowledgePointByName" parameterType="String" resultMap="KnowledgePointResult">
+        <include refid="selectKnowledgePointVo"/>
+        where kp_name = #{kpName}
+    </select>
+
+    <insert id="insertKnowledgePoint" parameterType="KnowledgePoint" useGeneratedKeys="true" keyProperty="id">
+        insert into knowledge_point
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="kpName != null and kpName != ''">kp_name,</if>
+            <if test="kpDesc != null">kp_desc,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="kpName != null and kpName != ''">#{kpName},</if>
+            <if test="kpDesc != null">#{kpDesc},</if>
+         </trim>
+    </insert>
+
+    <update id="updateKnowledgePoint" parameterType="KnowledgePoint">
+        update knowledge_point
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="kpName != null and kpName != ''">kp_name = #{kpName},</if>
+            <if test="kpDesc != null">kp_desc = #{kpDesc},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteKnowledgePointById" parameterType="Long">
+        delete from knowledge_point where id = #{id}
+    </delete>
+
+    <delete id="deleteKnowledgePointByIds" parameterType="String">
+        delete from knowledge_point where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
